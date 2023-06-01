@@ -1,116 +1,64 @@
-import React, { useState } from "react";
 import "./assets/scss/common.scss";
 
-async function callApi<T = any>({
-  url,
-  method,
-}: {
-  url: string;
-  method: string;
-}) {
-  const res = await fetch(url, { method });
-  const json = await res?.json();
-
-  if (!res.ok) {
-    throw {
-      statusText: res.statusText,
-      json,
-    };
-  }
-
-  return json as T;
-}
-
-function App() {
-  const [fetchResult, setFetchResult] = useState<string[]>([]);
+const App = () => {
+  const handleClickAdd = () => {};
 
   return (
     <>
-      <button
-        className="button-with-margin"
-        onClick={async () => {
-          try {
-            const json = await callApi<{ messages: string }>({
-              url: "/test",
-              method: "post",
-            });
+      <header className="header">
+        <h1 className="title">TODO</h1>
+      </header>
+      <main className="content">
+        <section id="add">
+          <input className="input" type="text" placeholder="What to do?" />
+          <button className="button" type="button" onClick={handleClickAdd}>
+            Add
+          </button>
+        </section>
 
-            setFetchResult([...fetchResult, JSON.stringify(json.messages)]);
-          } catch (e) {
-            console.log("e", e);
-          }
-        }}
-      >
-        post test
-      </button>
-      <button
-        className="button-with-margin"
-        onClick={async () => {
-          try {
-            const json = await callApi<{ messages: string }>({
-              url: "/test",
-              method: "get",
-            });
+        <section id="todos">
+          <div className="top">
+            <span className="total">total</span>
+            <ul className="filters">
+              <li>
+                <button type="button" className="button active">
+                  All
+                </button>
+              </li>
+              <li>
+                <button type="button" className="button">
+                  Active
+                </button>
+              </li>
+              <li>
+                <button type="button" className="button">
+                  Completed
+                </button>
+              </li>
+            </ul>
+          </div>
 
-            setFetchResult([...fetchResult, JSON.stringify(json.messages)]);
-          } catch (e) {
-            console.log("e", e);
-          }
-        }}
-      >
-        get test
-      </button>
-      <button
-        className="button-with-margin"
-        onClick={async () => {
-          try {
-            const json = await callApi<{ messages: string }>({
-              url: "/test",
-              method: "put",
-            });
-
-            setFetchResult([...fetchResult, JSON.stringify(json.messages)]);
-          } catch (e) {
-            console.log("e", e);
-          }
-        }}
-      >
-        put test
-      </button>
-      <button
-        className="button-with-margin"
-        onClick={async () => {
-          try {
-            const json = await callApi<{ messages: string }>({
-              url: "/test",
-              method: "delete",
-            });
-
-            setFetchResult([...fetchResult, JSON.stringify(json.messages)]);
-          } catch (e) {
-            console.log("e", e);
-          }
-        }}
-      >
-        delete test
-      </button>
-      <button
-        className="button-with-margin clear"
-        onClick={() => setFetchResult([])}
-      >
-        Clear!
-      </button>
-      <br />
-      <br />
-      {fetchResult?.length > 0 && (
-        <ul className="fetch-result">
-          {[...fetchResult].reverse().map((v, i) => (
-            <li key={`${v}-${i}`}>{v}</li>
-          ))}
-        </ul>
-      )}
+          <ul className="list">
+            <li className="todo">
+              <div className="checkbox">
+                <input id="check" className="input" type="checkbox" />
+                <label className="label" htmlFor="check" />
+              </div>
+              <div className="value">Todo 1</div>
+              <div className="actions">
+                <button type="button" className="button">
+                  Edit
+                </button>
+                <button type="button" className="button">
+                  Delete
+                </button>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </main>
     </>
   );
-}
+};
 
 export default App;

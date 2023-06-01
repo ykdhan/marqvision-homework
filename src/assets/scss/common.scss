@@ -1,9 +1,101 @@
 @import "./reset";
+@import "./variables";
+@import "./button";
+@import "./todo";
 
 html,
 body {
   font-family: Arial, sans-serif;
 }
 
-#app {
+#root {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+  max-width: 600px;
+  padding: 60px 20px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.header {
+  box-sizing: border-box;
+
+  .title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 40px;
+
+    &::before {
+      content: "✏️";
+      display: block;
+      font-size: 40px;
+      line-height: 48px;
+    }
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  #add {
+    display: flex;
+    gap: 10px;
+    .input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      height: 40px;
+      font-size: 16px;
+      line-height: 22px;
+      background-color: $yellow;
+      border-radius: 10px;
+      box-sizing: border-box;
+    }
+  }
+
+  #todos {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .filters {
+        display: flex;
+
+        .button {
+          background-color: transparent;
+          border-radius: 40px;
+
+          &.active {
+            background-color: $pink0;
+          }
+        }
+      }
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .pagination {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+  }
 }
