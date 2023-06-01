@@ -1,0 +1,72 @@
+@import "./variables";
+
+.button {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: $gray9;
+  background-color: $gray2;
+  border-radius: 10px;
+  transition: background-color 200ms ease-out;
+
+  &:hover {
+    background-color: $gray3;
+  }
+}
+
+.input {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  width: 100%;
+  height: 40px;
+  font-size: 16px;
+  line-height: 22px;
+  background-color: $yellow;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.checkbox {
+  width: 28px;
+  height: 28px;
+
+  .input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+
+    &:checked + .label {
+      background-color: $pink1;
+
+      &::before {
+        opacity: 1;
+      }
+    }
+  }
+  .label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: $gray0;
+    border-radius: 10px;
+    cursor: pointer;
+
+    &::before {
+      content: "✔️";
+      display: block;
+      font-size: 18px;
+      line-height: 22px;
+      opacity: 0;
+    }
+  }
+}
