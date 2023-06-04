@@ -1,6 +1,6 @@
 @import "./reset";
 @import "./variables";
-@import "./inputs";
+@import "./forms";
 @import "./todo";
 
 html,
@@ -83,6 +83,13 @@ body {
       display: flex;
       flex-direction: column;
       gap: 10px;
+    }
+
+    .empty {
+      font-size: 16px;
+      line-height: 20px;
+      color: $gray7;
+      text-align: center;
     }
 
     .pagination {

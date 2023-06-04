@@ -1,21 +1,48 @@
-import { useState } from "react";
 import "./assets/scss/common.scss";
-import Todo from "./components/Todo";
+import React, { useEffect, useState } from "react";
+import Todo, { TodoProps } from "./components/Todo";
+import { useTodoStore } from "./stores/todo";
 
-export enum FilterType {
-  all,
-  active,
-  completed,
-}
+export const filters = ["all", "active", "completed"];
 
 const App = () => {
-  const [filter, setFilter] = useState<FilterType>(FilterType.all);
+  const todos = useTodoStore((state) => state.todos);
+  const addTodo = useTodoStore((state) => state.addTodo);
+  const [filter, setFilter] = useState<string>(filters[0]);
+  const [newTodo, setNewTodo] = useState<string>("");
+  const [list, setList] = useState<TodoProps[]>([]);
 
-  const handleClickAdd = () => {};
+  const handleChangeNewTodo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewTodo(e.target.value);
+  };
 
-  const handleClickFilter = (filter: FilterType) => {
+  const handleKeyDownNewTodo = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && newTodo.length) {
+      const target = e.target as HTMLInputElement;
+      setNewTodo(target.value);
+      handleClickAdd();
+    }
+  };
+
+  const handleClickAdd = async () => {
+    addTodo(newTodo);
+    setNewTodo("");
+  };
+
+  const handleClickFilter = (filter: string) => {
     setFilter(filter);
   };
+
+  useEffect(() => {
+    setList(
+      todos.filter((todo) => {
+        if (filter === "all") return true;
+        else if (filter === "active") return todo.completedAt.length === 0;
+        else if (filter === "completed") return todo.completedAt.length > 0;
+        return true;
+      })
+    );
+  }, [filter, todos]);
 
   return (
     <>
@@ -24,82 +51,65 @@ const App = () => {
       </header>
       <main className="content">
         <section id="add">
-          <input className="input" type="text" placeholder="What to do?" />
-          <button className="button" type="button" onClick={handleClickAdd}>
+          <input
+            className="input"
+            type="text"
+            placeholder="What to do?"
+            value={newTodo}
+            onChange={handleChangeNewTodo}
+            onKeyDown={handleKeyDownNewTodo}
+          />
+          <button
+            className="button"
+            type="button"
+            onClick={handleClickAdd}
+            disabled={!newTodo}
+          >
             Add
           </button>
         </section>
 
         <section id="todos">
           <div className="top">
-            <span className="total">total</span>
+            <span className="total">
+              {list.length} {list.length > 1 ? "tasks" : "task"}
+            </span>
             <ul className="filters">
-              <li>
-                <button
-                  type="button"
-                  className={`button ${
-                    filter === FilterType.all ? "active" : ""
-                  }`}
-                  onClick={() => handleClickFilter(FilterType.all)}
-                >
-                  All
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  className={`button ${
-                    filter === FilterType.active ? "active" : ""
-                  }`}
-                  onClick={() => handleClickFilter(FilterType.active)}
-                >
-                  Active
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  className={`button ${
-                    filter === FilterType.completed ? "active" : ""
-                  }`}
-                  onClick={() => handleClickFilter(FilterType.completed)}
-                >
-                  Completed
-                </button>
-              </li>
+              {filters.map((item: string, index: number) => {
+                return (
+                  <li key={`filter-${index}`}>
+                    <button
+                      type="button"
+                      className={`button ${filter === item ? "active" : ""}`}
+                      onClick={() => handleClickFilter(item)}
+                    >
+                      {item[0].toUpperCase() + item.substring(1)}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
-          <ul className="list">
-            <Todo
-              id={"1"}
-              value={"Todo1"}
-              references={[]}
-              createdAt="2023-06-02"
-              updatedAt="2023-06-02"
-            />
-            <Todo
-              id={"2"}
-              value={"Todo2"}
-              references={["1", "3"]}
-              createdAt="2023-06-02"
-              updatedAt="2023-06-02"
-            />
-            <Todo
-              id={"3"}
-              value={"Todo3"}
-              references={[]}
-              createdAt="2023-06-02"
-              updatedAt="2023-06-02"
-            />
-            <Todo
-              id={"4"}
-              value={"Todo4"}
-              references={[]}
-              createdAt="2023-06-02"
-              updatedAt="2023-06-02"
-            />
-          </ul>
+          {list.length ? (
+            <ul className="list">
+              {list.map((todo) => {
+                return (
+                  <Todo
+                    key={`todo-${todo.id}`}
+                    id={todo.id}
+                    content={todo.content}
+                    references={todo.references}
+                    createdAt={todo.createdAt}
+                    updatedAt={todo.updatedAt}
+                    completedAt={todo.completedAt}
+                  />
+                );
+              })}
+            </ul>
+          ) : (
+            <div className="empty">You have nothing to do.</div>
+          )}
         </section>
       </main>
     </>

@@ -16,6 +16,12 @@
   &:hover {
     background-color: $gray3;
   }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+    pointer-events: none;
+  }
 }
 
 .input {

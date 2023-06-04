@@ -1,43 +1,83 @@
 import { rest } from "msw";
+import { TodoProps } from "../components/Todo";
+import { createRandomId, getTodayDate } from "../lib/Utils";
 
-const data = { messages: [] as string[] };
+const data = { todos: [] as TodoProps[] };
 
 export const handlers = [
-  rest.get("/test", (req, res, ctx) => {
+  rest.get("/todos", (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
-        messages: data.messages,
+        success: true,
+        result: data.todos,
       })
     );
   }),
-  rest.post("/test", (req, res, ctx) => {
-    const newMessage = `message(${Date.now()})`;
+  rest.post("/todo", async (req, res, ctx) => {
+    const body = await req.text();
+    const params = Object.fromEntries(new URLSearchParams(body));
+    const id = createRandomId();
+    const date = getTodayDate();
 
-    data.messages.push(newMessage);
-
-    return res(
-      ctx.status(200),
-      ctx.json({
-        messages: newMessage,
-      })
-    );
-  }),
-  rest.put("/test", (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
-        messages: "put!!!",
-      })
-    );
-  }),
-  rest.delete("/test", (req, res, ctx) => {
-    data.messages = [];
+    const newTodo = {
+      id,
+      content: params.content,
+      references: [],
+      createdAt: date,
+      updatedAt: "",
+      completedAt: "",
+    };
+    data.todos.push(newTodo);
 
     return res(
       ctx.status(200),
       ctx.json({
-        messages: "message deleted",
+        success: true,
+        result: newTodo,
+      })
+    );
+  }),
+  rest.put("/todo/:id", async (req, res, ctx) => {
+    const body = await req.text();
+    const params = Object.fromEntries(new URLSearchParams(body));
+    const index = data.todos.findIndex((todo) => todo.id === req.params.id);
+
+    if (index > -1) {
+      const date = getTodayDate();
+
+      if (params.content) {
+        data.todos[index].content = params.content;
+        data.todos[index].updatedAt = date;
+      }
+      if (params.completedAt) {
+        data.todos[index].completedAt = params.completedAt;
+      }
+
+      return res(
+        ctx.status(200),
+        ctx.json({
+          success: true,
+          result: data.todos,
+        })
+      );
+    }
+
+    return res(
+      ctx.status(200),
+      ctx.json({
+        success: false,
+      })
+    );
+  }),
+  rest.delete("/todo/:id", async (req, res, ctx) => {
+    data.todos = data.todos.filter((todo) => todo.id !== String(req.params.id));
+
+    return res(
+      ctx.status(200),
+      ctx.json({
+        success: true,
+        result: data.todos,
       })
     );
   }),
