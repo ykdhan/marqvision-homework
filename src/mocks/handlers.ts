@@ -2,7 +2,10 @@ import { rest } from "msw";
 import { TodoProps } from "../components/Todo";
 import { createRandomId, getTodayDate } from "../lib/Utils";
 
-const data = { todos: [] as TodoProps[] };
+const stored = window.localStorage.getItem("marqvision-todos");
+const data = {
+  todos: stored ? (JSON.parse(stored) as TodoProps[]) : ([] as TodoProps[]),
+};
 
 export const handlers = [
   rest.get("/todos", (req, res, ctx) => {

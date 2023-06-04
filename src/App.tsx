@@ -9,6 +9,7 @@ export const filters = ["all", "active", "completed"];
 
 const App = () => {
   const todos = useTodoStore((state) => state.todos);
+  const setTodos = useTodoStore((state) => state.setTodos);
   const addTodo = useTodoStore((state) => state.addTodo);
   const referenceSetting = usePopupStore((state) => state.referenceSetting);
 
@@ -76,6 +77,11 @@ const App = () => {
     setFiltered(arr);
     setList(arr.slice(from, to));
   }, [filter, page, todos]);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("marqvision-todos");
+    stored && setTodos(JSON.parse(stored));
+  }, [setTodos]);
 
   return (
     <>
