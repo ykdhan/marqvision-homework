@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { getTodayDate } from "../lib/Utils";
 import { useTodoStore } from "../stores/todo";
+import { usePopupStore } from "../stores/popup";
 
 export interface TodoProps {
   id: string;
@@ -12,9 +13,14 @@ export interface TodoProps {
 }
 
 const Todo = (props: TodoProps) => {
+  const todos = useTodoStore((state) => state.todos);
   const editTodo = useTodoStore((state) => state.editTodo);
   const completeTodo = useTodoStore((state) => state.completeTodo);
   const deleteTodo = useTodoStore((state) => state.deleteTodo);
+  const setReferenceSetting = usePopupStore(
+    (state) => state.setReferenceSetting
+  );
+
   const [editable, setEditable] = useState<boolean>(false);
   const [content, setContent] = useState<string>(props.content);
   const [completed, setCompleted] = useState<string>(props.completedAt || "");
@@ -27,9 +33,29 @@ const Todo = (props: TodoProps) => {
     if (e.key === "Enter" && content.length) handleClickSave();
   };
 
-  const handleChangeCompleted = (e: React.ChangeEvent<HTMLInputElement>) => {
-    completeTodo(props.id, e.target.checked ? getTodayDate() : "");
-  };
+  const handleChangeCompleted = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.checked) {
+        if (
+          props.references.length &&
+          !props.references.every(
+            (id) => todos.find((todo) => todo.id === id)?.completedAt.length
+          )
+        ) {
+          alert("References need to be completed first.");
+          return;
+        }
+
+        const date = getTodayDate();
+        setCompleted(date);
+        completeTodo(props.id, date);
+      } else {
+        setCompleted("");
+        completeTodo(props.id, "");
+      }
+    },
+    [completeTodo, props.id, props.references, todos]
+  );
 
   const handleClickSave = () => {
     editTodo(props.id, content);
@@ -46,8 +72,12 @@ const Todo = (props: TodoProps) => {
     }
   };
 
+  const handleClickReferenceSetting = () => {
+    setReferenceSetting(props.id);
+  };
+
   useEffect(() => {
-    setCompleted(props.completedAt || "");
+    setCompleted(props.completedAt);
   }, [props.completedAt]);
 
   return (
@@ -103,14 +133,27 @@ const Todo = (props: TodoProps) => {
         </div>
       </div>
       <div className="container">
-        <ul className="references">
-          {props.references.map((reference) => {
-            return <li className="tag">@{reference}</li>;
-          })}
-        </ul>
+        <div className="reference-container">
+          <button
+            type="button"
+            className="button reference-button"
+            onClick={handleClickReferenceSetting}
+          >
+            🔗
+          </button>
+          <ul className="references">
+            {props.references.map((reference) => {
+              return (
+                <li key={`ref-${reference}`} className="tag">
+                  {reference}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
         <ul className="dates">
-          <li>작성일 {props.createdAt}</li>
-          {props.updatedAt.length > 0 && <li>최종수정일 {props.updatedAt}</li>}
+          <li>Created {props.createdAt}</li>
+          {props.updatedAt.length > 0 && <li>Updated {props.updatedAt}</li>}
         </ul>
       </div>
     </li>

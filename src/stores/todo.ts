@@ -7,6 +7,7 @@ export interface useTodoStoreType {
   addTodo: (content: string) => void;
   editTodo: (id: string, content: string) => void;
   completeTodo: (id: string, date: string) => void;
+  setTodoReferences: (id: string, references: string[]) => void;
   deleteTodo: (id: string) => void;
 }
 
@@ -36,6 +37,16 @@ export const useTodoStore: UseBoundStore<StoreApi<useTodoStoreType>> = create(
     completeTodo: (id, date) => {
       const params = new URLSearchParams({
         completedAt: date,
+      });
+      updateTodo(id, params).then((res) => {
+        if (res) {
+          set(() => ({ todos: res }));
+        }
+      });
+    },
+    setTodoReferences: (id, references) => {
+      const params = new URLSearchParams({
+        references: JSON.stringify(references),
       });
       updateTodo(id, params).then((res) => {
         if (res) {

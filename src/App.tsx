@@ -2,15 +2,21 @@ import "./assets/scss/common.scss";
 import React, { useEffect, useState } from "react";
 import Todo, { TodoProps } from "./components/Todo";
 import { useTodoStore } from "./stores/todo";
+import Popup from "./components/Popup";
+import { usePopupStore } from "./stores/popup";
 
 export const filters = ["all", "active", "completed"];
 
 const App = () => {
   const todos = useTodoStore((state) => state.todos);
   const addTodo = useTodoStore((state) => state.addTodo);
+  const referenceSetting = usePopupStore((state) => state.referenceSetting);
+
   const [filter, setFilter] = useState<string>(filters[0]);
   const [newTodo, setNewTodo] = useState<string>("");
+  const [filtered, setFiltered] = useState<TodoProps[]>([]);
   const [list, setList] = useState<TodoProps[]>([]);
+  const [page, setPage] = useState<number>(1);
 
   const handleChangeNewTodo = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewTodo(e.target.value);
@@ -33,16 +39,43 @@ const App = () => {
     setFilter(filter);
   };
 
+  const handleClickPage = (i: number) => {
+    setPage(i);
+  };
+
+  const pagination = () => {
+    const controls = [];
+
+    for (let i = 1; i <= Math.ceil(todos.length / 5); i++) {
+      controls.push(
+        <button
+          key={`pagination-${i}`}
+          type="button"
+          className="button"
+          onClick={() => handleClickPage(i)}
+          disabled={i === page}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    return controls;
+  };
+
   useEffect(() => {
-    setList(
-      todos.filter((todo) => {
-        if (filter === "all") return true;
-        else if (filter === "active") return todo.completedAt.length === 0;
-        else if (filter === "completed") return todo.completedAt.length > 0;
-        return true;
-      })
-    );
-  }, [filter, todos]);
+    const from = (page - 1) * 5;
+    const to = Math.min(from + 5, todos.length);
+    const arr = todos.filter((todo) => {
+      if (filter === "all") return true;
+      else if (filter === "active") return todo.completedAt.length === 0;
+      else if (filter === "completed") return todo.completedAt.length > 0;
+      return true;
+    });
+
+    setFiltered(arr);
+    setList(arr.slice(from, to));
+  }, [filter, page, todos]);
 
   return (
     <>
@@ -72,7 +105,7 @@ const App = () => {
         <section id="todos">
           <div className="top">
             <span className="total">
-              {list.length} {list.length > 1 ? "tasks" : "task"}
+              {filtered.length} {filtered.length > 1 ? "tasks" : "task"}
             </span>
             <ul className="filters">
               {filters.map((item: string, index: number) => {
@@ -110,8 +143,15 @@ const App = () => {
           ) : (
             <div className="empty">You have nothing to do.</div>
           )}
+
+          {filtered.length > 5 && (
+            <div className="pagination">{pagination()}</div>
+          )}
         </section>
       </main>
+      {referenceSetting && (
+        <Popup type="reference" data={{ id: referenceSetting }} />
+      )}
     </>
   );
 };

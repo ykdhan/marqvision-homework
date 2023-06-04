@@ -46,12 +46,15 @@ export const handlers = [
     if (index > -1) {
       const date = getTodayDate();
 
-      if (params.content) {
+      if (params.content != null || undefined) {
         data.todos[index].content = params.content;
         data.todos[index].updatedAt = date;
       }
-      if (params.completedAt) {
+      if (params.completedAt != null || undefined) {
         data.todos[index].completedAt = params.completedAt;
+      }
+      if (params.references != null || undefined) {
+        data.todos[index].references = JSON.parse(params.references);
       }
 
       return res(
